@@ -108,6 +108,11 @@ public final class TSimInterface {
 					int trainId = sEvent.getTrainId();
 
 					getSensorEventQueue(trainId).put(sEvent);
+
+					// TODO: Check for which zone the sensor belongs to by checking the sensor
+					// coords in the zone.
+					// - if it belongs to a zone, toggle the zone
+					// - if it doesn't, do nothing
 				}
 			} catch (UnparsableInputException e) {
 				this.err.println(e.getMessage());
@@ -151,12 +156,14 @@ public final class TSimInterface {
 	 * Sets the speed of a train.
 	 *
 	 * @param trainId
-	 *            the id of the train to be affected by the command.
+	 *                the id of the train to be affected by the command.
 	 * @param speed
-	 *            the new speed of the train.
+	 *                the new speed of the train.
 	 * @throws CommandException
-	 *             if the supplied id was false (NO_SUCH_TRAIN), if the speed
-	 *             was illegal (ILLEGAL_SPEED) or if the train had crashed.
+	 *                          if the supplied id was false (NO_SUCH_TRAIN), if the
+	 *                          speed
+	 *                          was illegal (ILLEGAL_SPEED) or if the train had
+	 *                          crashed.
 	 *
 	 */
 	public synchronized void setSpeed(int trainId, int speed) throws CommandException {
@@ -185,16 +192,17 @@ public final class TSimInterface {
 	 * SWITCH_LEFT and SWITCH_RIGHT.
 	 *
 	 * @param xPos
-	 *            the x coordinate of the switch.
+	 *                  the x coordinate of the switch.
 	 * @param yPos
-	 *            the y coordinate of the switch.
+	 *                  the y coordinate of the switch.
 	 * @param switchDir
-	 *            the new direction of the switch.
+	 *                  the new direction of the switch.
 	 *
 	 * @throws CommandException
-	 *             if the coordinates of the switch were invalid
-	 *             (NO_SUCH_SWITCH) or if there was a train on the switch
-	 *             (TRAIN_ON_SWITCH)
+	 *                          if the coordinates of the switch were invalid
+	 *                          (NO_SUCH_SWITCH) or if there was a train on the
+	 *                          switch
+	 *                          (TRAIN_ON_SWITCH)
 	 *
 	 */
 	public synchronized void setSwitch(int xPos, int yPos, int switchDir) throws CommandException {
@@ -216,10 +224,10 @@ public final class TSimInterface {
 	 * Blocks the calling thread until the specified train passes a sensor.
 	 *
 	 * @param trainId
-	 *            the id of the train to wait for.
+	 *                the id of the train to wait for.
 	 * @return a SensorEvent representing the information about the event
 	 * @throws CommandException
-	 *             if the train has crashed.
+	 *                          if the train has crashed.
 	 *
 	 */
 	public SensorEvent getSensor(int trainId) throws CommandException, InterruptedException {

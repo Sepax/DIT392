@@ -22,13 +22,13 @@ public class SensorEvent implements TSimInformation {
 	 * represented by the trainId and the sensor by its coordinates.
 	 *
 	 * @param trainId
-	 *            the id of the train passing the sensor.
+	 *                the id of the train passing the sensor.
 	 * @param xPos
-	 *            the x coordinate of the sensor.
+	 *                the x coordinate of the sensor.
 	 * @param yPos
-	 *            the y coordinate of the sensor.
+	 *                the y coordinate of the sensor.
 	 * @param status
-	 *            the status of the sensor; either ACTIVE or INACTIVE/
+	 *                the status of the sensor; either ACTIVE or INACTIVE/
 	 *
 	 */
 
@@ -51,7 +51,7 @@ public class SensorEvent implements TSimInformation {
 	}
 
 	/**
-	 * Returns theyx coordinate of the affected sensor.
+	 * Returns the x coordinate of the affected sensor.
 	 *
 	 * @return the y coordinate of the affected sensor.
 	 *

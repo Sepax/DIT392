@@ -1,28 +1,37 @@
 package TSim;
 
+import java.util.ArrayList;
+
+import java.awt.Point;
 
 public class TZone {
-    public String   TZoneName;
-    public SensorEvent[] sensorPair;
-    public boolean active;
-    
-    public TZone( String name , SensorEvent x , SensorEvent y ){
-        this.TZoneName  = name;
-        this.sensorPair = new SensorEvent[2];
-        this.sensorPair[0] = x;
-        this.sensorPair[1] = y;
+    private String name;
+    private Point[] sensorPair;
+    private boolean active;
+
+    public TZone(String name, Point s1, Point s2) {
+        this.name = name;
+        this.sensorPair = new Point[2];
+        this.sensorPair[0] = s1;
+        this.sensorPair[1] = s2;
         this.active = false;
-    } 
-
-    // toggleZone
-    //      If a sensor becomes active:
-    //      toggle "active" boolean.
-
-     void toggle (){
-        if (active == false) { active = true;  }
-        else                 { active = false; }
-        System.out.println("toggled!");
     }
-    
-}
 
+    public void refresh(SensorEvent event) {
+        if (event.getXpos() != sensorPair[0].getX() || event.getYpos() != sensorPair[0].getY()) {
+            return;
+        }
+        if (event.getStatus() == SensorEvent.ACTIVE) {
+            toggle();
+        }
+    }
+    // toggleZone
+    // If a sensor becomes active:
+    // toggle "active" boolean.
+
+    private void toggle() {
+        active = !active;
+        System.out.println(name + " is now " + (active ? "active" : "inactive"));
+    }
+
+}
