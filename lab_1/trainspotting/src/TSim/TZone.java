@@ -21,6 +21,8 @@ public class TZone {
      void toggle (){
         if (active == false) { active = true;  }
         else                 { active = false; }
+        System.out.println("toggled!");
     }
+    
 }
 
