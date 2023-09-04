@@ -15,3 +15,16 @@ This way we know if a track-segment is occupied or not.
 
 ![zones](attachments/zones.png)
 
+### Zones
+
+![Layout](attachments/layout.png)
+
+- Station North A: (7,7)
+- Station North B: (16,8)
+- Station South A: (4,13)
+- Station South B: (6,11)
+- Zone 1: (4,11) --- (3,9)
+- Zone 2: (5,9) --- (14,9)
+- Zone 3: (5,10) --- (14,10)
+- Zone 4: (16,9) --- (16,7)
+- Zone 5: (9,7) --- (15,7)
