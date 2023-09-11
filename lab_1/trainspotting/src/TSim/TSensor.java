@@ -36,7 +36,7 @@ public class TSensor {
             return false;
         }
         for (TZone zone : adjZones) {
-            if (zone.isActive()) {
+            if (!zone.isActive()) {
                 return true;
             }
         }

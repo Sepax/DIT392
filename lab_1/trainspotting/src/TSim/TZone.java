@@ -18,13 +18,9 @@ public class TZone {
         this.sensorPair[1] = s2;
         this.sem = new Semaphore(1);
         this.tsim = TSimInterface.getInstance();
-
         try {
             if (startZone) {
-                // sem.acquire();
-                this.active = true;
-            } else {
-                this.active = false;
+                sem.acquire();
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -36,8 +32,7 @@ public class TZone {
     }
 
     public boolean isActive() {
-        return active;
-        // return sem.availablePermits() == 0;
+        return sem.availablePermits() == 0;
     }
 
     public TSensor[] getSensors() {
@@ -62,11 +57,9 @@ public class TZone {
 
     private void toggle(SensorEvent event, TSensor sensor) throws InterruptedException, CommandException {
         if (isActive()) {
-            active = false;
-            // sem.release(); // zone is now inactive
+            sem.release();
         } else {
-            active = true;
-            // sem.acquire(); // zone is now active
+            sem.acquire();
         }
     }
 

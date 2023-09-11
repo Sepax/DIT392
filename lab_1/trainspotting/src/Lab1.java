@@ -41,14 +41,14 @@ public class Lab1 {
 
 			// create zones
 			TZone Z1 = new TZone("ZONE 1", A1, B1, true);
-			TZone Z2 = new TZone("ZONE 1", A2, B2, false);
-			TZone Z3 = new TZone("ZONE 1", A3, B3, false);
-			TZone Z4 = new TZone("ZONE 1", A4, B4, false);
-			TZone Z5 = new TZone("ZONE 1", A5, B5, false);
-			TZone Z6 = new TZone("ZONE 1", A6, B6, false);
-			TZone Z7 = new TZone("ZONE 1", A7, B7, false);
-			TZone Z8 = new TZone("ZONE 1", A8, B8, true);
-			TZone Z9 = new TZone("ZONE 1", A9, B9, false);
+			TZone Z2 = new TZone("ZONE 2", A2, B2, false);
+			TZone Z3 = new TZone("ZONE 3", A3, B3, false);
+			TZone Z4 = new TZone("ZONE 4", A4, B4, false);
+			TZone Z5 = new TZone("ZONE 5", A5, B5, false);
+			TZone Z6 = new TZone("ZONE 6", A6, B6, false);
+			TZone Z7 = new TZone("ZONE 7", A7, B7, false);
+			TZone Z8 = new TZone("ZONE 8", A8, B8, true);
+			TZone Z9 = new TZone("ZONE 9", A9, B9, false);
 
 			// add adjacent zones to sensors
 			A3.addAdjZone(Z1);
@@ -79,6 +79,16 @@ public class Lab1 {
 			B7.addAdjZone(Z8);
 
 			B7.addAdjZone(Z9);
+
+			tsi.addZone(Z1);
+			tsi.addZone(Z2);
+			tsi.addZone(Z3);
+			tsi.addZone(Z4);
+			tsi.addZone(Z5);
+			tsi.addZone(Z6);
+			tsi.addZone(Z7);
+			tsi.addZone(Z8);
+			tsi.addZone(Z9);
 
 			tsi.setSpeed(1, speed1);
 			tsi.setSpeed(2, speed2);
