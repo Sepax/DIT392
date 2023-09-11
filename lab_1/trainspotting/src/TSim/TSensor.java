@@ -10,10 +10,12 @@ public class TSensor {
     private ArrayList<TZone> adjZones;
     public TSwitch tSwitch;
     boolean hasSwitch;
+    boolean isStation;
 
-    public TSensor(int xPos, int yPos) {
+    public TSensor(int xPos, int yPos, boolean isStation) {
         this.xPos = xPos;
         this.yPos = yPos;
+        this.isStation = isStation;
         this.adjZones = new ArrayList<>();
         this.hasSwitch = false;
         this.tsim = TSimInterface.getInstance();
