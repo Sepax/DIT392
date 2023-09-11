@@ -1,7 +1,5 @@
 package TSim;
 
-import java.awt.Point;
-import java.util.ArrayList;
 import java.util.concurrent.Semaphore;
 
 public class TZone {
@@ -18,6 +16,7 @@ public class TZone {
         this.sensorPair[1] = s2;
         this.sem = new Semaphore(1);
         this.tsim = TSimInterface.getInstance();
+        this.active = startZone;
         try {
             if (startZone) {
                 sem.acquire();
@@ -32,7 +31,8 @@ public class TZone {
     }
 
     public boolean isActive() {
-        return sem.availablePermits() == 0;
+        return active;
+        // return sem.availablePermits() == 0;
     }
 
     public TSensor[] getSensors() {
@@ -56,11 +56,7 @@ public class TZone {
     }
 
     private void toggle(SensorEvent event, TSensor sensor) throws InterruptedException, CommandException {
-        if (isActive()) {
-            sem.release();
-        } else {
-            sem.acquire();
-        }
+        active = !active;
     }
 
     // Check if the sensor event is one of the sensors in the zone.

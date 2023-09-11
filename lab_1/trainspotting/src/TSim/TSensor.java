@@ -6,8 +6,8 @@ public class TSensor {
     private int xPos;
     private int yPos;
 
+    public TSwitch sw;
     private ArrayList<TZone> adjZones;
-    // Here should be a switch
 
     public TSensor(int xPos, int yPos) {
         this.xPos = xPos;
@@ -45,7 +45,7 @@ public class TSensor {
 
     public TZone getFreeZone() {
         for (TZone zone : adjZones) {
-            if (zone.isActive()) {
+            if (!zone.isActive()) {
                 return zone;
             }
         }
