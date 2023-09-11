@@ -3,6 +3,7 @@ package TSim;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.concurrent.*;
 
 /**
@@ -41,6 +42,8 @@ public final class TSimInterface {
 	private static OutputStream outStream; // we send commands to tsim
 	private static OutputStream errStream; // errors for debugging
 	private boolean debug = false;
+
+	private ArrayList<TZone> zones = new ArrayList<>();
 
 	/**
 	 * Create a new TSimInterface
@@ -108,11 +111,18 @@ public final class TSimInterface {
 					int trainId = sEvent.getTrainId();
 
 					getSensorEventQueue(trainId).put(sEvent);
-
-					// TODO: Check for which zone the sensor belongs to by checking the sensor
+					// Check for which zone the sensor belongs to by checking the sensor
 					// coords in the zone.
 					// - if it belongs to a zone, toggle the zone
 					// - if it doesn't, do nothing
+
+					for (TZone zone : zones) {
+						try {
+							zone.refresh(sEvent);
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
 				}
 			} catch (UnparsableInputException e) {
 				this.err.println(e.getMessage());
@@ -239,6 +249,14 @@ public final class TSimInterface {
 			throw new CommandException(tEvent.toString());
 
 		return getSensorEventQueue(trainId).take();
+	}
+
+	public void addZone(TZone zone) {
+		zones.add(zone);
+	}
+
+	public ArrayList<TZone> getZones() {
+		return zones;
 	}
 
 }
