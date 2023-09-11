@@ -111,18 +111,7 @@ public final class TSimInterface {
 					int trainId = sEvent.getTrainId();
 
 					getSensorEventQueue(trainId).put(sEvent);
-					// Check for which zone the sensor belongs to by checking the sensor
-					// coords in the zone.
-					// - if it belongs to a zone, toggle the zone
-					// - if it doesn't, do nothing
 
-					for (TZone zone : zones) {
-						try {
-							zone.refresh(sEvent);
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
-					}
 				}
 			} catch (UnparsableInputException e) {
 				this.err.println(e.getMessage());
@@ -250,13 +239,4 @@ public final class TSimInterface {
 
 		return getSensorEventQueue(trainId).take();
 	}
-
-	public void addZone(TZone zone) {
-		zones.add(zone);
-	}
-
-	public ArrayList<TZone> getZones() {
-		return zones;
-	}
-
 }
