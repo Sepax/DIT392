@@ -36,8 +36,7 @@ public class TZone {
     }
 
     public boolean isActive() {
-        // return sem.availablePermits() == 0;
-        return active;
+        return sem.availablePermits() == 0;
     }
 
     public TSensor[] getSensors() {
