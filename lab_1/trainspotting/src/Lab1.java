@@ -26,7 +26,7 @@ public class Lab1 {
 	public class TrainHandler implements Runnable {
 		TSimInterface tsi;
 		private int id;
-		private int speed;
+		public int speed;
 		private ArrayList<TZone> zones;
 
 		public TrainHandler(int id, int speed, ArrayList<TZone> zones, TSimInterface tsi) {
@@ -42,12 +42,20 @@ public class Lab1 {
 				try {
 					SensorEvent sEvent = tsi.getSensor(id);
 					for (TZone zone : zones) {
-						zone.refresh(sEvent);
+						zone.refresh(sEvent, speed);
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
+		}
+
+		public void setSpeed(int speed) {
+			this.speed = speed;
+		}
+
+		public int getSpeed() {
+			return speed;
 		}
 	}
 
@@ -67,8 +75,8 @@ public class Lab1 {
 		TSensor B6 = new TSensor(5, 9, false);
 		TSensor A7 = new TSensor(3, 9, false);
 		TSensor B7 = new TSensor(2, 11, false);
-		TSensor A8 = new TSensor(6, 11, true);
-		TSensor B8 = new TSensor(15, 11, false);
+		TSensor A8 = new TSensor(6, 11, false);
+		TSensor B8 = new TSensor(15, 11, true);
 		TSensor A9 = new TSensor(4, 13, false);
 		TSensor B9 = new TSensor(15, 13, true);
 
@@ -144,17 +152,17 @@ public class Lab1 {
 		A9.addSwitch(S4);
 
 		// add zones to list
-		ArrayList<TZone> z = new ArrayList<>();
-		z.add(Z1);
-		z.add(Z2);
-		z.add(Z3);
-		z.add(Z4);
-		z.add(Z5);
-		z.add(Z6);
-		z.add(Z7);
-		z.add(Z8);
-		z.add(Z9);
+		ArrayList<TZone> result = new ArrayList<>();
+		result.add(Z1);
+		result.add(Z2);
+		result.add(Z3);
+		result.add(Z4);
+		result.add(Z5);
+		result.add(Z6);
+		result.add(Z7);
+		result.add(Z8);
+		result.add(Z9);
 
-		return z;
+		return result;
 	}
 }

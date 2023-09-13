@@ -78,4 +78,8 @@ public class TSensor {
         }
         return null;
     }
+
+    public boolean isStation() {
+        return isStation;
+    }
 }

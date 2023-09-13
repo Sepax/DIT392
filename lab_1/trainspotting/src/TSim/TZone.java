@@ -1,5 +1,7 @@
 package TSim;
 
+import TSim.*;
+
 import java.util.concurrent.Semaphore;
 
 public class TZone {
@@ -7,6 +9,7 @@ public class TZone {
     private TSensor[] sensorPair;
     private Semaphore sem;
     private TSimInterface tsi;
+    private boolean active;
 
     public TZone(String name, TSensor s1, TSensor s2, boolean startZone, TSimInterface tsi) {
         this.name = name;
@@ -15,6 +18,7 @@ public class TZone {
         this.sensorPair[1] = s2;
         this.sem = new Semaphore(1);
         this.tsi = tsi;
+        boolean active = startZone;
         try {
             if (startZone) {
                 sem.acquire();
@@ -29,20 +33,21 @@ public class TZone {
     }
 
     public boolean isActive() {
-        return sem.availablePermits() == 0;
+        // return sem.availablePermits() == 0;
+        return active;
     }
 
     public TSensor[] getSensors() {
         return sensorPair;
     }
 
-    public void refresh(SensorEvent event) throws InterruptedException, CommandException {
+    public void refresh(SensorEvent event, int speed) throws InterruptedException, CommandException {
         for (TSensor sensor : sensorPair) {
             if (!sensorMatch(event, sensor)) {
                 continue;
             }
             if (event.getStatus() == SensorEvent.ACTIVE) {
-                toggle(event, sensor);
+                toggle(event, sensor, speed);
                 printStatus();
             }
         }
@@ -52,15 +57,24 @@ public class TZone {
         return;
     }
 
-    private void toggle(SensorEvent event, TSensor sensor) throws InterruptedException, CommandException {
+    private void toggle(SensorEvent event, TSensor sensor, int speed) throws InterruptedException, CommandException {
         TZone nextZone;
         TZone currentZone = this;
+
+        if (sensor.isStation() && event.getStatus() == SensorEvent.ACTIVE) {
+            tsi.setSpeed(event.getTrainId(), 0);
+            Thread.sleep((1000 + (20 * Math.abs(speed))));
+            speed = -speed;
+            tsi.setSpeed(event.getTrainId(), speed);
+            return;
+        }
 
         if (!sensor.hasFreeZone()) {
             tsi.setSpeed(event.trainId, 0);
             nextZone = sensor.getAdjZones().get(0);
+            Thread.sleep((1000 + (20 * Math.abs(speed))));
             nextZone.getSemaphore().acquire();
-            tsi.setSpeed(event.trainId, 10);
+            tsi.setSpeed(event.trainId, speed);
             nextZone.getSemaphore().release();
         } else {
             nextZone = sensor.getFreeZone();
@@ -68,10 +82,12 @@ public class TZone {
 
         sensor.adjustSwitch(currentZone, nextZone);
 
-        if (isActive()) {
+        if (isActive() && !sensor.isStation()) {
+            nextZone.getSemaphore().acquire();
+            active = false;
             sem.release();
-        } else {
-            sem.acquire();
+        } else if (!sensor.isStation) {
+            active = true;
         }
     }
 
