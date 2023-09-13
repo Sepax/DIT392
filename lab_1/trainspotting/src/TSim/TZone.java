@@ -11,14 +11,13 @@ public class TZone {
     private TSimInterface tsi;
     private boolean active;
 
-    public TZone(String name, TSensor s1, TSensor s2, boolean startZone, TSimInterface tsi) {
+    public TZone(TSimInterface tsi, String name, TSensor s1, TSensor s2, boolean startZone) {
         this.name = name;
         this.sensorPair = new TSensor[2];
         this.sensorPair[0] = s1;
         this.sensorPair[1] = s2;
         this.sem = new Semaphore(1);
         this.tsi = tsi;
-        boolean active = startZone;
         try {
             if (startZone) {
                 sem.acquire();
@@ -26,6 +25,10 @@ public class TZone {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public TZone(TSimInterface tsi, String name, TSensor s1, TSensor s2) {
+        this(tsi, name, s1, s2, false);
     }
 
     public Semaphore getSemaphore() {
@@ -83,11 +86,9 @@ public class TZone {
         sensor.adjustSwitch(currentZone, nextZone);
 
         if (isActive() && !sensor.isStation()) {
-            nextZone.getSemaphore().acquire();
-            active = false;
             sem.release();
-        } else if (!sensor.isStation) {
-            active = true;
+        } else {
+            sem.acquire();
         }
     }
 

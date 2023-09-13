@@ -1,5 +1,4 @@
 import TSim.*;
-import java.awt.Point;
 import java.util.ArrayList;
 
 public class Lab1 {
@@ -61,35 +60,35 @@ public class Lab1 {
 
 	private ArrayList<TZone> zoneConfig(TSimInterface tsi) {
 		// create sensors
-		TSensor A1 = new TSensor(15, 3, true);
-		TSensor B1 = new TSensor(7, 7, false);
-		TSensor A2 = new TSensor(15, 5, true);
-		TSensor B2 = new TSensor(16, 8, false);
-		TSensor A3 = new TSensor(9, 7, false);
-		TSensor B3 = new TSensor(15, 7, false);
-		TSensor A4 = new TSensor(18, 7, false);
-		TSensor B4 = new TSensor(16, 9, false);
-		TSensor A5 = new TSensor(14, 10, false);
-		TSensor B5 = new TSensor(5, 10, false);
-		TSensor A6 = new TSensor(14, 9, false);
-		TSensor B6 = new TSensor(5, 9, false);
-		TSensor A7 = new TSensor(3, 9, false);
-		TSensor B7 = new TSensor(2, 11, false);
-		TSensor A8 = new TSensor(6, 11, false);
-		TSensor B8 = new TSensor(15, 11, true);
-		TSensor A9 = new TSensor(4, 13, false);
-		TSensor B9 = new TSensor(15, 13, true);
+		TSensor A1 = new TSensor(tsi, 15, 3, true);
+		TSensor B1 = new TSensor(tsi, 7, 7);
+		TSensor A2 = new TSensor(tsi, 15, 5, true);
+		TSensor B2 = new TSensor(tsi, 16, 8);
+		TSensor A3 = new TSensor(tsi, 9, 7);
+		TSensor B3 = new TSensor(tsi, 15, 7);
+		TSensor A4 = new TSensor(tsi, 18, 7);
+		TSensor B4 = new TSensor(tsi, 16, 9);
+		TSensor A5 = new TSensor(tsi, 14, 10);
+		TSensor B5 = new TSensor(tsi, 5, 10);
+		TSensor A6 = new TSensor(tsi, 14, 9);
+		TSensor B6 = new TSensor(tsi, 5, 9);
+		TSensor A7 = new TSensor(tsi, 3, 9);
+		TSensor B7 = new TSensor(tsi, 2, 11);
+		TSensor A8 = new TSensor(tsi, 6, 11);
+		TSensor B8 = new TSensor(tsi, 15, 11, true);
+		TSensor A9 = new TSensor(tsi, 4, 13);
+		TSensor B9 = new TSensor(tsi, 15, 13, true);
 
 		// create zones (stations are start zones)
-		TZone Z1 = new TZone("ZONE 1", A1, B1, true, tsi);
-		TZone Z2 = new TZone("ZONE 2", A2, B2, false, tsi);
-		TZone Z3 = new TZone("ZONE 3", A3, B3, false, tsi);
-		TZone Z4 = new TZone("ZONE 4", A4, B4, false, tsi);
-		TZone Z5 = new TZone("ZONE 5", A5, B5, false, tsi);
-		TZone Z6 = new TZone("ZONE 6", A6, B6, false, tsi);
-		TZone Z7 = new TZone("ZONE 7", A7, B7, false, tsi);
-		TZone Z8 = new TZone("ZONE 8", A8, B8, true, tsi);
-		TZone Z9 = new TZone("ZONE 9", A9, B9, false, tsi);
+		TZone Z1 = new TZone(tsi, "ZONE 1", A1, B1, true);
+		TZone Z2 = new TZone(tsi, "ZONE 2", A2, B2);
+		TZone Z3 = new TZone(tsi, "ZONE 3", A3, B3);
+		TZone Z4 = new TZone(tsi, "ZONE 4", A4, B4);
+		TZone Z5 = new TZone(tsi, "ZONE 5", A5, B5);
+		TZone Z6 = new TZone(tsi, "ZONE 6", A6, B6);
+		TZone Z7 = new TZone(tsi, "ZONE 7", A7, B7);
+		TZone Z8 = new TZone(tsi, "ZONE 8", A8, B8, true);
+		TZone Z9 = new TZone(tsi, "ZONE 9", A9, B9);
 
 		// add adjacent zones to sensors
 		A3.addAdjZone(Z1);
@@ -113,13 +112,13 @@ public class Lab1 {
 		B7.addAdjZone(Z8);
 		B7.addAdjZone(Z9);
 
-		// create switches depending on the switch direction
+		// create switches
 		TSwitch S1 = new TSwitch(17, 7);
 		TSwitch S2 = new TSwitch(15, 9);
 		TSwitch S3 = new TSwitch(4, 9);
 		TSwitch S4 = new TSwitch(3, 11);
 
-		// add zones for each "direction" of the switches
+		// add zone links for each "direction" of the switches
 		S1.addLeftZone(Z3);
 		S1.addLeftZone(Z4);
 		S1.addRightZone(Z2);

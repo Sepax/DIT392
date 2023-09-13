@@ -3,22 +3,28 @@ package TSim;
 import java.util.ArrayList;
 
 public class TSensor {
+    private TSimInterface tsi;
+
     private int xPos;
     private int yPos;
 
-    private TSimInterface tsim;
     private ArrayList<TZone> adjZones;
-    public TSwitch tSwitch;
-    boolean hasSwitch;
-    boolean isStation;
+    private TSwitch tSwitch;
 
-    public TSensor(int xPos, int yPos, boolean isStation) {
+    private boolean hasSwitch;
+    private boolean station;
+
+    public TSensor(TSimInterface tsi, int xPos, int yPos, boolean station) {
         this.xPos = xPos;
         this.yPos = yPos;
-        this.isStation = isStation;
+        this.station = station;
         this.adjZones = new ArrayList<>();
         this.hasSwitch = false;
-        this.tsim = TSimInterface.getInstance();
+        this.tsi = TSimInterface.getInstance();
+    }
+
+    public TSensor(TSimInterface tsi, int xPos, int yPos) {
+        this(tsi, xPos, yPos, false);
     }
 
     public void addAdjZone(TZone zone) {
@@ -51,7 +57,7 @@ public class TSensor {
             dir = 0;
         }
 
-        tsim.setSwitch(tSwitch.getX(), tSwitch.getY(), dir); // PROBLEM SKER
+        tsi.setSwitch(tSwitch.getX(), tSwitch.getY(), dir); // PROBLEM SKER
     }
 
     public ArrayList<TZone> getAdjZones() {
@@ -80,6 +86,6 @@ public class TSensor {
     }
 
     public boolean isStation() {
-        return isStation;
+        return station;
     }
 }
