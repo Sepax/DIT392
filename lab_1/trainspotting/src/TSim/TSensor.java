@@ -12,19 +12,27 @@ public class TSensor {
     private TSwitch tSwitch;
 
     private boolean hasSwitch;
-    private boolean station;
+    private sType type;
 
-    public TSensor(TSimInterface tsi, int xPos, int yPos, boolean station) {
+    public enum sType {
+        NORMAL, STATION, ACQUIRE, RELEASE
+    }
+
+    public TSensor(TSimInterface tsi, int xPos, int yPos, sType type) {
         this.xPos = xPos;
         this.yPos = yPos;
-        this.station = station;
         this.adjZones = new ArrayList<>();
         this.hasSwitch = false;
+        this.type = type;
         this.tsi = TSimInterface.getInstance();
     }
 
     public TSensor(TSimInterface tsi, int xPos, int yPos) {
-        this(tsi, xPos, yPos, false);
+        this(tsi, xPos, yPos, sType.NORMAL);
+    }
+
+    public sType getType() {
+        return type;
     }
 
     public void addAdjZone(TZone zone) {
@@ -36,6 +44,14 @@ public class TSensor {
         this.hasSwitch = true;
     }
 
+    public TSwitch getSwitch() {
+        return tSwitch;
+    }
+
+    public boolean hasSwitch() {
+        return hasSwitch;
+    }
+
     public int getX() {
         return xPos;
     }
@@ -45,19 +61,11 @@ public class TSensor {
     }
 
     public void adjustSwitch(TZone currentZone, TZone nextZone) throws CommandException {
-        if (!currentZone.isActive() || !hasSwitch) {
+        if (!hasSwitch) {
             return;
         }
 
-        int dir;
-
-        if (tSwitch.getRightZones().contains(currentZone) && tSwitch.getRightZones().contains(nextZone)) {
-            dir = 1;
-        } else {
-            dir = 0;
-        }
-
-        tsi.setSwitch(tSwitch.getX(), tSwitch.getY(), dir); // PROBLEM SKER
+        tSwitch.adjust(currentZone, nextZone);
     }
 
     public ArrayList<TZone> getAdjZones() {
@@ -86,6 +94,6 @@ public class TSensor {
     }
 
     public boolean isStation() {
-        return station;
+        return type == sType.STATION;
     }
 }
