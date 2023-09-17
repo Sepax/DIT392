@@ -92,6 +92,10 @@ public class Lab1 {
 						if (sensor.isActive(sEvent)) {
 
 							handleEvent(sensor, sEvent);
+							System.out.println("Active zones:");
+							for (TZone activZone : activeZones) {
+								System.out.println(activZone.getId());
+							}
 						}
 					}
 
@@ -126,6 +130,7 @@ public class Lab1 {
 
 				// If the train is not in the zone, try to acquire the semaphore for the zone
 				// (train is entering zone)
+
 				if (zone.getSemaphore().tryAcquire()) {
 					activeZones.add(zone);
 					adjustSwitch(sensor, zone);
@@ -221,12 +226,12 @@ public class Lab1 {
 			TSensor S6 = new TSensor(6, 10, 5);
 			TSensor S7 = new TSensor(7, 10, 7);
 			TSensor S8 = new TSensor(8, 10, 8);
-			TSensor S9 = new TSensor(9, 9, 7);
+			TSensor S9 = new TSensor(9, 19, 7);
 			TSensor S10 = new TSensor(10, 17, 9);
-			TSensor S11 = new TSensor(11, 13, 9);
-			TSensor S12 = new TSensor(12, 13, 10);
-			TSensor S13 = new TSensor(13, 6, 9);
-			TSensor S14 = new TSensor(14, 6, 10);
+			TSensor S11 = new TSensor(11, 12, 9);
+			TSensor S12 = new TSensor(12, 12, 10);
+			TSensor S13 = new TSensor(13, 7, 9);
+			TSensor S14 = new TSensor(14, 7, 10);
 			TSensor S15 = new TSensor(15, 2, 9);
 			TSensor S16 = new TSensor(16, 1, 11);
 			TSensor S17 = new TSensor(17, 5, 11);
@@ -236,33 +241,26 @@ public class Lab1 {
 
 			S1.addZone(Z1);
 			S9.addZone(Z1);
-
 			S3.addZone(Z2);
 			S9.addZone(Z2);
-
 			S5.addZone(Z3);
 			S6.addZone(Z3);
 			S7.addZone(Z3);
 			S8.addZone(Z3);
-
 			S2.addZone(Z4);
 			S4.addZone(Z4);
 			S11.addZone(Z4);
 			S12.addZone(Z4);
-
 			S10.addZone(Z5);
 			S10.addZone(Z6);
 			S15.addZone(Z6);
 			S15.addZone(Z5);
-
 			S13.addZone(Z7);
 			S14.addZone(Z7);
 			S17.addZone(Z7);
 			S19.addZone(Z7);
-
 			S16.addZone(Z8);
 			S18.addZone(Z8);
-
 			S16.addZone(Z9);
 			S20.addZone(Z9);
 
@@ -274,15 +272,12 @@ public class Lab1 {
 			S2.setSwitch(SW1);
 			S4.setSwitch(SW1);
 			S9.setSwitch(SW1);
-
 			S10.setSwitch(SW2);
 			S11.setSwitch(SW2);
 			S12.setSwitch(SW2);
-
 			S13.setSwitch(SW3);
 			S14.setSwitch(SW3);
 			S15.setSwitch(SW3);
-
 			S16.setSwitch(SW4);
 			S17.setSwitch(SW4);
 			S19.setSwitch(SW4);
