@@ -6,17 +6,15 @@ public class TZone {
     private String name;
     private TSensor[] sensorPair;
     private Semaphore sem;
-    private boolean active;
-    private TSimInterface tsim;
+    private TSimInterface tsi;
 
-    public TZone(String name, TSensor s1, TSensor s2, boolean startZone) {
+    public TZone(String name, TSensor s1, TSensor s2, boolean startZone, TSimInterface tsi) {
         this.name = name;
         this.sensorPair = new TSensor[2];
         this.sensorPair[0] = s1;
         this.sensorPair[1] = s2;
         this.sem = new Semaphore(1);
-        this.tsim = TSimInterface.getInstance();
-        this.active = startZone;
+        this.tsi = tsi;
         try {
             if (startZone) {
                 sem.acquire();
@@ -31,8 +29,7 @@ public class TZone {
     }
 
     public boolean isActive() {
-        return active;
-        // return sem.availablePermits() == 0;
+        return sem.availablePermits() == 0;
     }
 
     public TSensor[] getSensors() {
@@ -56,7 +53,26 @@ public class TZone {
     }
 
     private void toggle(SensorEvent event, TSensor sensor) throws InterruptedException, CommandException {
-        active = !active;
+        TZone nextZone;
+        TZone currentZone = this;
+
+        if (!sensor.hasFreeZone()) {
+            tsi.setSpeed(event.trainId, 0);
+            nextZone = sensor.getAdjZones().get(0);
+            nextZone.getSemaphore().acquire();
+            tsi.setSpeed(event.trainId, 10);
+            nextZone.getSemaphore().release();
+        } else {
+            nextZone = sensor.getFreeZone();
+        }
+
+        sensor.adjustSwitch(currentZone, nextZone);
+
+        if (isActive()) {
+            sem.release();
+        } else {
+            sem.acquire();
+        }
     }
 
     // Check if the sensor event is one of the sensors in the zone.
