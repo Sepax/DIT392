@@ -2,6 +2,7 @@ package amazed.solver;
 
 import amazed.maze.Maze;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
@@ -61,14 +62,56 @@ public class ForkJoinSolver
      *           goal node in the maze; <code>null</code> if such a path cannot
      *           be found.
      */
+    AtomicBoolean hasFoundGoal = new AtomicBoolean(false);
+
     @Override
     public List<Integer> compute()
     {
-        return parallelSearch();
+        return parallelSearch(start);
     }
 
-    private List<Integer> parallelSearch()
-    {
-        return null;
+    private List<Integer> parallelSearch(int start){
+
+        int player = maze.newPlayer(start);
+        List<Integer> finalPath = new ArrayList<>();
+        finalPath = null;
+
+        frontier.push(start);
+
+        while(!frontier.empty()){
+
+            int current = frontier.pop();
+
+            if (maze.hasGoal(current)){
+
+                hasFoundGoal.set(true);
+                maze.move(player, current);
+                return pathFromTo(start,current);
+            }
+
+            if(!visited.contains(current)){
+
+                int neighborsToCurrent = 0;
+                maze.move(player, current);
+                visited.add(current);
+                
+                for (int nb : maze.neighbors(current)){
+                    neighborsToCurrent++;
+                }
+                if (neighborsToCurrent == 1){
+                    //continue as usual
+                    continue;
+                }
+                if (neighborsToCurrent > 1){
+                    // forloop to create new threads for every new road to explore
+                }
+
+
+
+            }
+        }
+
+        //if not path found return original (= null)
+        return finalPath;
     }
 }
