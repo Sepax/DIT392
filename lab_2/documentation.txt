@@ -1,0 +1,45 @@
+Short explanation:
+For each new node which has more than two neighbours, we create a new fork that does 
+its own parallel search. If a goal was found, the forks path will be built.
+
+When we then combine forks, we only combine the forks that have a path 
+which is not null, which is the path to the goal.
+
+Note: We decided to not use forkAfter in this solution
+
+ForkJoinSolver instance variables:
+- AtomicBoolean goalFound                       # true if a thread has found a goal
+- ConcurrentSkipListSet<Integer> visited        # visited nodes of all threads
+- HashMap<Integer, ForkJoinSolver> solvers      #map of children threads and their start positions
+
+ForkJoinSolver constructors:
+- ForkJoinSolver(Maze maze)                     # creates a maze with maze.start() as starting node
+- ForkJoinSolver(int start, Maze maze)          # creates a maze with argument "start" as starting node
+- ForkJoinSolver(Maze maze, int forkAfter)      # just used to call first constructor, forkAfter is ignored
+
+ForkJoinSolver methods:
+
+- List<Integer> parallelSearch(int start)                                                         
+    1. Inits player and adds start node to frontier.
+    2. As long as not all nodes have been processed:
+        a. If goal is found by some thread, break the loop
+        b. Get new node to process from frontier stack
+        c. Move player to this node and mark it as visited.
+        d. If this node is the goal, build path and break the loop.
+        e. If goal is not found, go through neighbors of current node.          # void processNeighbours(int current, int player)
+    3. Join paths of children threads with this path if possible and return.    # List<Integer> joinSolvers(List<Integer> path)
+
+- void processNeighbours(int current, int player)
+    1. Current thread processes first unvisited neighbour
+    2. If more unvisited neighbours exist, fork new threads.    # void createFork(int current, int nb)
+
+- void createFork(int current, int nb)      # creates a new fork thread, which does it's own parallel search. 
+    1. Creates new ForkJoinSolver
+    2. Adds it to solver hashmap
+    3. forks the solver                              
+
+- List<Integer> joinSolvers(List<Integer> path)                 # takes a path and adds all children thread's paths to it.
+    1. For each (child) fork in solvers:
+        a. Joins fork and stores it's path
+        b. if the path is not null, add path to parent path.    # path is null if the goal was not found
+

@@ -37,6 +37,13 @@ public class ForkJoinSolver extends SequentialSolver {
         solvers = new HashMap<>();
     }
 
+    /**
+     * Creates a solver that searches in <code>maze</code> from the
+     * start node to a goal. Start node is given by its identifier.
+     *
+     * @param start the identifier of the start node
+     * @param maze  the maze to be searched
+     */
     public ForkJoinSolver(int start, Maze maze) {
         this(maze);
         this.start = start;
@@ -74,20 +81,12 @@ public class ForkJoinSolver extends SequentialSolver {
         return parallelSearch(start);
     }
 
-    public HashMap<Integer, ForkJoinSolver> getSolvers() {
-        return solvers;
-    }
-
     private List<Integer> parallelSearch(int start) {
-        // result to be returned
-        List<Integer> pathFromTo = null;
+        // path to be returned
+        List<Integer> path = null;
 
-        // visit the start node
-        visited.add(start);
-
-        // one player active on the maze at start
+        // init player, add start node to frontier.
         int player = maze.newPlayer(start);
-        // start with start node
         frontier.push(start);
 
         // as long as not all nodes have been processed
@@ -100,68 +99,70 @@ public class ForkJoinSolver extends SequentialSolver {
             // get new node to process
             int current = frontier.pop();
 
-            // move player to current node
+            // move player to current node and mark it as visited.
             maze.move(player, current);
+            visited.add(current);
 
-            // if we have reached the goal
+            // if current node is the goal, build path and break the loop.
             if (maze.hasGoal(current)) {
                 goalFound.set(true);
-                pathFromTo = pathFromTo(start, current);
+                path = pathFromTo(start, current);
                 break;
             }
 
-            // go through neighbors of current node
+            // if goal is not found, go through neighbors of current node
             processNeighbours(current, player);
 
         }
 
-        return joinSolvers(pathFromTo);
+        return joinSolvers(path);
     }
 
+    // Process all neighbours of current node. If more than one unvisited neighbour
+    // exists, new solvers need to be created.
     private void processNeighbours(int current, int player) {
-        boolean firstNb = true;
+        boolean firstNeighbour = true;
         for (int nb : maze.neighbors(current)) {
-            // if nb has been visited, continue, else add to visited
+            // if nb has been visited, continue.
             if (visited.contains(nb)) {
                 continue;
             }
 
-            if (firstNb) {
-                // current thread should process first neighbour
-                visited.add(nb);
+            // current thread should process first neighbour. All other neighbours should
+            // be processed by other threads.
+            if (firstNeighbour) {
                 frontier.push(nb);
                 predecessor.put(nb, current);
-                firstNb = false;
+                firstNeighbour = false;
             } else {
-                // all other neighbours should be processed by other threads
                 createFork(current, nb);
             }
         }
     }
 
+    // Create and fork a new solver thread, and add it to the parent solver's
+    // hashmap.
     private void createFork(int current, int nb) {
-        // create a new ForkJoinSolver object
         ForkJoinSolver solver = new ForkJoinSolver(nb, maze);
-
-        // save the solver to a hashmap of solvers
         solvers.put(current, solver);
-
-        // fork the solver
         solver.fork();
     }
 
-    private List<Integer> joinSolvers(List<Integer> pathFromTo) {
+    // Join all child solvers, and add their paths to the parent solver's path. Only
+    // paths which are not null are added, which implies that only paths that lead
+    // to a goal are added.
+    private List<Integer> joinSolvers(List<Integer> path) {
         for (Map.Entry<Integer, ForkJoinSolver> e : solvers.entrySet()) {
-            int current = e.getKey();
             ForkJoinSolver solver = e.getValue();
-            List<Integer> path = solver.join();
-            if (path != null) {
-                pathFromTo = pathFromTo(start, current);
-                pathFromTo.addAll(path);
+            int solverStart = e.getKey();
+            List<Integer> solverPath = solver.join();
+            if (solverPath != null) {
+                path = pathFromTo(start, solverStart);
+                path.addAll(solverPath);
             }
         }
 
-        return pathFromTo;
+        return path;
     }
 
 }
