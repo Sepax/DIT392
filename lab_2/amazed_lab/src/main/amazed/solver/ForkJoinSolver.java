@@ -24,7 +24,7 @@ public class ForkJoinSolver extends SequentialSolver {
 
     static private AtomicBoolean goalFound = new AtomicBoolean();
     static private ConcurrentSkipListSet<Integer> visited = new ConcurrentSkipListSet<>();
-    private HashMap<Integer, ForkJoinSolver> solvers;
+    private ArrayList<ForkJoinSolver> solvers;
 
     /**
      * Creates a solver that searches in <code>maze</code> from the
@@ -34,7 +34,7 @@ public class ForkJoinSolver extends SequentialSolver {
      */
     public ForkJoinSolver(Maze maze) {
         super(maze);
-        solvers = new HashMap<>();
+        solvers = new ArrayList<>();
     }
 
     /**
@@ -79,6 +79,10 @@ public class ForkJoinSolver extends SequentialSolver {
     @Override
     public List<Integer> compute() {
         return parallelSearch(start);
+    }
+
+    public int getStartPos() {
+        return start;
     }
 
     private List<Integer> parallelSearch(int start) {
@@ -143,11 +147,11 @@ public class ForkJoinSolver extends SequentialSolver {
     // Create and fork a new solver thread, and add it to the parent solver's
     // hashmap.
     private void createFork(int current, int nb) {
-        if (!visited.contains(nb)){
-        visited.add(nb);
-        ForkJoinSolver solver = new ForkJoinSolver(nb, maze);
-        solvers.put(current, solver);
-        solver.fork();
+        if (!visited.contains(nb)) {
+            visited.add(nb);
+            ForkJoinSolver solver = new ForkJoinSolver(nb, maze);
+            solvers.add(solver);
+            solver.fork();
         }
     }
 
@@ -155,12 +159,10 @@ public class ForkJoinSolver extends SequentialSolver {
     // paths which are not null are added, which implies that only paths that lead
     // to a goal are added.
     private List<Integer> joinSolvers(List<Integer> path) {
-        for (Map.Entry<Integer, ForkJoinSolver> e : solvers.entrySet()) {
-            ForkJoinSolver solver = e.getValue();
-            int solverStart = e.getKey();
+        for (ForkJoinSolver solver : solvers) {
             List<Integer> solverPath = solver.join();
             if (solverPath != null) {
-                path = pathFromTo(start, solverStart);
+                path = pathFromTo(start, solver.getStartPos());
                 path.addAll(solverPath);
             }
         }
