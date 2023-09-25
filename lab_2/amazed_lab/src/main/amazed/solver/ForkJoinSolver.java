@@ -114,6 +114,11 @@ public class ForkJoinSolver extends SequentialSolver {
 
             // if current node is the goal, build path and break the loop.
             if (maze.hasGoal(current)) {
+                try {
+                    wait(10000);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 goalFound.set(true);
                 path = pathFromTo(start, current);
                 break;
