@@ -109,8 +109,8 @@ public class ForkJoinSolver extends SequentialSolver {
             int current = frontier.pop();
 
             // move player to current node and mark it as visited.
-            maze.move(player, current);
             visited.add(current);
+            maze.move(player, current);
 
             // if current node is the goal, build path and break the loop.
             if (maze.hasGoal(current)) {
