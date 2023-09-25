@@ -25,6 +25,7 @@ public class ForkJoinSolver extends SequentialSolver {
     static private AtomicBoolean goalFound = new AtomicBoolean();
     static private ConcurrentSkipListSet<Integer> visited = new ConcurrentSkipListSet<>();
     private ArrayList<ForkJoinSolver> solvers;
+    private int origin;
 
     /**
      * Creates a solver that searches in <code>maze</code> from the
@@ -81,8 +82,12 @@ public class ForkJoinSolver extends SequentialSolver {
         return parallelSearch(start);
     }
 
-    public int getStartPos() {
-        return start;
+    public void addOrigin(int origin) {
+        this.origin = origin;
+    }
+
+    public int getOrigin() {
+        return origin;
     }
 
     private List<Integer> parallelSearch(int start) {
@@ -150,6 +155,7 @@ public class ForkJoinSolver extends SequentialSolver {
         if (!visited.contains(nb)) {
             visited.add(nb);
             ForkJoinSolver solver = new ForkJoinSolver(nb, maze);
+            solver.addOrigin(current);
             solvers.add(solver);
             solver.fork();
         }
@@ -162,7 +168,7 @@ public class ForkJoinSolver extends SequentialSolver {
         for (ForkJoinSolver solver : solvers) {
             List<Integer> solverPath = solver.join();
             if (solverPath != null) {
-                path = pathFromTo(start, solver.getStartPos());
+                path = pathFromTo(start, solver.getOrigin());
                 path.addAll(solverPath);
             }
         }
