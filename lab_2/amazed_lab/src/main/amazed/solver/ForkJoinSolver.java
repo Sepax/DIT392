@@ -143,9 +143,12 @@ public class ForkJoinSolver extends SequentialSolver {
     // Create and fork a new solver thread, and add it to the parent solver's
     // hashmap.
     private void createFork(int current, int nb) {
+        if (!visited.contains(nb)){
+        visited.add(nb);
         ForkJoinSolver solver = new ForkJoinSolver(nb, maze);
         solvers.put(current, solver);
         solver.fork();
+        }
     }
 
     // Join all child solvers, and add their paths to the parent solver's path. Only
