@@ -110,7 +110,7 @@ public class ForkJoinSolver extends SequentialSolver {
 
             // move player to current node and mark it as visited.
             visited.add(current);
-            maze.move(player, current);
+            maze.move(player, current); 
 
             // if current node is the goal, build path and break the loop.
             if (maze.hasGoal(current)) {
@@ -139,11 +139,11 @@ public class ForkJoinSolver extends SequentialSolver {
 
             // current thread should process first neighbour. All other neighbours should
             // be processed by other threads.
-            if (firstNeighbour) {
+            if (firstNeighbour && visited.add(nb)) {
                 frontier.push(nb);
                 predecessor.put(nb, current);
                 firstNeighbour = false;
-            } else {
+            } else if (visited.add(nb)) {
                 createFork(current, nb);
             }
         }
@@ -152,14 +152,13 @@ public class ForkJoinSolver extends SequentialSolver {
     // Create and fork a new solver thread, and add it to the parent solver's
     // hashmap.
     private void createFork(int current, int nb) {
-        if (!visited.contains(nb)) {
-            visited.add(nb);
+        // change visited contain to add
+            
             ForkJoinSolver solver = new ForkJoinSolver(nb, maze);
             solver.addOrigin(current);
             solvers.add(solver);
             solver.fork();
         }
-    }
 
     // Join all child solvers, and add their paths to the parent solver's path. Only
     // paths which are not null are added, which implies that only paths that lead
