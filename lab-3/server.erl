@@ -5,7 +5,7 @@
 % Do not change the signature of this function.
 start(ServerAtom) ->
     % TODO Implement function
-    % - Spawn a new process which waits for a message, handles it, then loops infinitely
+    % - Spawn a new process which waits for a message, handles it (handleRequest) , then loops infinitely
     % - Register this process to ServerAtom
     % - Return the process ID
     not_implemented.
@@ -16,3 +16,15 @@ stop(ServerAtom) ->
     % TODO Implement function
     % Return ok
     not_implemented.
+
+
+
+handleRequest() % request type
+    joinRoom() % if request type is joining room
+    leaveRoom() % if request type is leave room
+    sendMessage() % if request type is send message
+    
+
+
+
+
