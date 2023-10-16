@@ -4,26 +4,44 @@
 % Start a new server process with the given name
 % Do not change the signature of this function.
 start(ServerAtom) ->
-    % TODO Implement function
-    % - Spawn a new process which waits for a message, handles it (handleRequest) , then loops infinitely
-    % - Register this process to ServerAtom
-    % - Return the process ID
-    not_implemented.
+    genserver:start(ServerAtom, [], fun handle/2).
 
 % Stop the server process registered to the given name,
 % together with any other associated processes
 stop(ServerAtom) ->
-    % TODO Implement function
-    % Return ok
-    not_implemented.
+    genserver:request(ServerAtom, stop_channels),
+    genserver:stop(ServerAtom).
 
+% Join the given client to the given channel
+handle(State, {join, Client, Channel}) ->
+    case lists:member(Channel, State) of
+        % If the channel does exist just join it
+        true ->
+            channel:join(Channel, Client),
+            {reply, ok, State};
+        % If the channel does not exist, start it and join it
+        false ->
+            channel:start(Channel),
+            channel:join(Channel, Client),
+            {reply, ok, [Channel|State]}
+    end;
 
+% Leave the given client from the given channel
+handle(State, {leave, Client, Channel}) ->
+    % If the channel does exist, request to leave it
+    case lists:member(Channel, State) of
+        true -> 
+            channel:leave(Channel, Client),
+            {reply, ok, State};
+        false ->
+            {reply, {error, "Channel does not exist"}, State}
+    end;
 
-handleRequest() % request type
-    joinRoom() % if request type is joining room
-    leaveRoom() % if request type is leave room
-    sendMessage() % if request type is send message
-    
+% Stop all channels in the server
+handle(State, stop_channels) -> 
+    lists:foreach(fun (Channel) -> channel:stop(Channel) end, State),
+    {reply, ok, []}.
+
 
 
 
