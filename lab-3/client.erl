@@ -1,8 +1,11 @@
 -module(client).
 -export([handle/2, initial_state/3]).
 
+% ---------------------------------------------------------------------------- %
+%                                 Client State                                 %
+% ---------------------------------------------------------------------------- %
+
 % This record defines the structure of the state of a client.
-% Add whatever other fields you need.
 -record(client_state, {
     gui, % atom of the GUI process
     nick, % nick/username of the client
@@ -10,7 +13,6 @@
 }).
 
 % Return an initial state record. This is called from GUI.
-% Do not change the signature of this function.
 initial_state(Nick, GUIAtom, ServerAtom) ->
     #client_state{
         gui = GUIAtom,
@@ -18,13 +20,19 @@ initial_state(Nick, GUIAtom, ServerAtom) ->
         server = ServerAtom
     }.
 
-% handle/2 handles each kind of request from GUI
-% Parameters:
-%   - the current state of the client (State)
-%   - request data from GUI
-% Must return a tuple {reply, Data, NewState}, where:
-%   - Data is what is sent to GUI, either the atom `ok` or a tuple {error, Atom, "Error message"}
-%   - NewState is the updated state of the client
+% ---------------------------------------------------------------------------- %
+%                                    Helpers                                   %
+% ---------------------------------------------------------------------------- %
+
+server_registered(State) ->
+    lists:member(State#client_state.server, registered()).
+
+join(State, Channel) ->
+    genserver:request(State#client_state.server, {join, self(), Channel}).
+
+% ---------------------------------------------------------------------------- %
+%                                Request Handler                               %
+% ---------------------------------------------------------------------------- %
 
 % Join channel
 handle(State, {join, Channel}) ->
@@ -41,14 +49,9 @@ handle(State, {message_send, Channel, Msg}) ->
     Result = genserver:request(list_to_atom(Channel), {message_send, Channel, self(), State#client_state.nick, Msg}),
     {reply, Result, State};
 
-% This case is only relevant for the distinction assignment!
 % Change nick (no check, local only)
 handle(State, {nick, NewNick}) ->
     {reply, ok, State#client_state{nick = NewNick}} ;
-
-% ---------------------------------------------------------------------------
-% The cases below do not need to be changed...
-% But you should understand how they work!
 
 % Get current nick
 handle(State, whoami) ->

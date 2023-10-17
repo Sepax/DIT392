@@ -24,7 +24,7 @@ leave(Name, Client) ->
 handle(State, {join, Client}) ->
     case lists:member(Client, State) of
         true ->
-            {reply, {error, user_already_joined ,  "Already joined"}, State};
+            {reply, {error, user_already_joined ,  "User already joined"}, State};
         false ->
             {reply, ok, [Client | State]}
     end;
@@ -34,7 +34,7 @@ handle(State, {leave, Client}) ->
         true ->
             {reply, ok, lists:delete(Client, State)};
         false ->
-            {reply, {error, user_not_joined , "Client is not joined"}, State}
+            {reply, {error, user_not_joined , "User not Joined"}, State}
     end;
 
 
@@ -48,7 +48,7 @@ handle(State, {message_send, Channel, Client, Nick, Msg}) ->
             ),
             {reply, ok, State};
         false ->
-            {reply, {error, user_not_joined , "Client is not joined"}, State}
+            {reply, {error, user_not_joined , "User not Joined"}, State}
     end.
 
 
