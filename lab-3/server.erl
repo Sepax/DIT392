@@ -17,8 +17,13 @@ handle(State, {join, Client, Channel}) ->
     case lists:member(Channel, State) of
         % If the channel does exist just join it
         true ->
-            channel:join(Channel, Client),
-            {reply, ok, State};
+            Response = catch channel:join(Channel, Client),
+            case Response of
+                ok ->
+                    {reply, ok, State};
+                _ ->
+                    {reply, {error, user_already_joined, "User already joined"}, State}
+            end;
         % If the channel does not exist, start it and join it
         false ->
             channel:start(Channel),
@@ -31,8 +36,13 @@ handle(State, {leave, Client, Channel}) ->
     % If the channel does exist, request to leave it
     case lists:member(Channel, State) of
         true -> 
-            channel:leave(Channel, Client),
-            {reply, ok, State};
+            Response = catch channel:leave(Channel, Client),
+            case Response of
+                ok ->
+                    {reply, ok, State};
+                _ ->
+                    {reply, {error, user_not_joined, "User not joined"}, State}
+            end;
         false ->
             {reply, {error, "Channel does not exist"}, State}
     end;

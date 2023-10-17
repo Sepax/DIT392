@@ -34,7 +34,7 @@ handle(State, {leave, Client}) ->
         true ->
             {reply, ok, lists:delete(Client, State)};
         false ->
-            {reply, {error, user_not_joined , "User not Joined"}, State}
+            {reply, {error, user_not_joined , "User not joined"}, State}
     end;
 
 
