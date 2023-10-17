@@ -2,13 +2,14 @@ package amazed.solver;
 
 import amazed.maze.Maze;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.List;
+import java.security.KeyPair;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * <code>ForkJoinSolver</code> implements a solver for
@@ -19,19 +20,34 @@ import java.util.concurrent.ConcurrentSkipListSet;
  * <code>ForkJoinPool</code> object.
  */
 
+public class ForkJoinSolver extends SequentialSolver {
 
-public class ForkJoinSolver
-    extends SequentialSolver
-{
+    static private AtomicBoolean goalFound = new AtomicBoolean();
+    static private ConcurrentSkipListSet<Integer> visited = new ConcurrentSkipListSet<>();
+    private ArrayList<ForkJoinSolver> solvers;
+    private int origin;
+
     /**
      * Creates a solver that searches in <code>maze</code> from the
      * start node to a goal.
      *
-     * @param maze   the maze to be searched
+     * @param maze the maze to be searched
      */
-    public ForkJoinSolver(Maze maze)
-    {
+    public ForkJoinSolver(Maze maze) {
         super(maze);
+        solvers = new ArrayList<>();
+    }
+
+    /**
+     * Creates a solver that searches in <code>maze</code> from the
+     * start node to a goal. Start node is given by its identifier.
+     *
+     * @param start the identifier of the start node
+     * @param maze  the maze to be searched
+     */
+    public ForkJoinSolver(int start, Maze maze) {
+        this(maze);
+        this.start = start;
     }
 
     /**
@@ -39,14 +55,13 @@ public class ForkJoinSolver
      * start node to a goal, forking after a given number of visited
      * nodes.
      *
-     * @param maze        the maze to be searched
-     * @param forkAfter   the number of steps (visited nodes) after
-     *                    which a parallel task is forked; if
-     *                    <code>forkAfter &lt;= 0</code> the solver never
-     *                    forks new tasks
+     * @param maze      the maze to be searched
+     * @param forkAfter the number of steps (visited nodes) after
+     *                  which a parallel task is forked; if
+     *                  <code>forkAfter &lt;= 0</code> the solver never
+     *                  forks new tasks
      */
-    public ForkJoinSolver(Maze maze, int forkAfter)
-    {
+    public ForkJoinSolver(Maze maze, int forkAfter) {
         this(maze);
         this.forkAfter = forkAfter;
     }
@@ -58,60 +73,106 @@ public class ForkJoinSolver
      * goals, or all goals are unreacheable), the method returns
      * <code>null</code>.
      *
-     * @return   the list of node identifiers from the start node to a
-     *           goal node in the maze; <code>null</code> if such a path cannot
-     *           be found.
+     * @return the list of node identifiers from the start node to a
+     *         goal node in the maze; <code>null</code> if such a path cannot
+     *         be found.
      */
-    AtomicBoolean hasFoundGoal = new AtomicBoolean(false);
-
     @Override
-    public List<Integer> compute()
-    {
+    public List<Integer> compute() {
         return parallelSearch(start);
     }
 
-    private List<Integer> parallelSearch(int start){
+    public void addOrigin(int origin) {
+        this.origin = origin;
+    }
 
+    public int getOrigin() {
+        return origin;
+    }
+
+    private List<Integer> parallelSearch(int start) {
+        // path to be returned
+        List<Integer> path = null;
+
+        // init player, add start node to frontier.
         int player = maze.newPlayer(start);
-        List<Integer> finalPath = new ArrayList<>();
-        finalPath = null;
-
         frontier.push(start);
 
-        while(!frontier.empty()){
-
-            int current = frontier.pop();
-
-            if (maze.hasGoal(current)){
-
-                hasFoundGoal.set(true);
-                maze.move(player, current);
-                return pathFromTo(start,current);
+        // as long as not all nodes have been processed
+        while (!frontier.empty()) {
+            // if goal is found by some thread, break the loop.
+            if (goalFound.get()) {
+                break;
             }
 
-            if(!visited.contains(current)){
+            // get new node to process
+            int current = frontier.pop();
 
-                int neighborsToCurrent = 0;
-                maze.move(player, current);
-                visited.add(current);
-                
-                for (int nb : maze.neighbors(current)){
-                    neighborsToCurrent++;
-                }
-                if (neighborsToCurrent == 1){
-                    //continue as usual
-                    continue;
-                }
-                if (neighborsToCurrent > 1){
-                    // forloop to create new threads for every new road to explore
-                }
+            // move player to current node and mark it as visited.
+            visited.add(current);
+            maze.move(player, current); 
 
+            // if current node is the goal, build path and break the loop.
+            if (maze.hasGoal(current)) {
+                goalFound.set(true);
+                path = pathFromTo(start, current);
+                break;
+            }
 
+            // if goal is not found, go through neighbors of current node
+            processNeighbours(current, player);
 
+        }
+
+        return joinSolvers(path);
+    }
+
+    // Process all neighbours of current node. If more than one unvisited neighbour
+    // exists, new solvers need to be created.
+    private void processNeighbours(int current, int player) {
+        boolean firstNeighbour = true;
+        for (int nb : maze.neighbors(current)) {
+            // if nb has been visited, continue.
+            if (visited.contains(nb)) {
+                continue;
+            }
+
+            // current thread should process first neighbour. All other neighbours should
+            // be processed by other threads.
+            if (firstNeighbour && visited.add(nb)) {
+                frontier.push(nb);
+                predecessor.put(nb, current);
+                firstNeighbour = false;
+            } else if (visited.add(nb)) {
+                createFork(current, nb);
+            }
+        }
+    }
+
+    // Create and fork a new solver thread, and add it to the parent solver's
+    // hashmap.
+    private void createFork(int current, int nb) {
+        // change visited contain to add
+            
+            ForkJoinSolver solver = new ForkJoinSolver(nb, maze);
+            solver.addOrigin(current);
+            solvers.add(solver);
+            solver.fork();
+        }
+
+    // Join all child solvers, and add their paths to the parent solver's path. Only
+    // paths which are not null are added, which implies that only paths that lead
+    // to a goal are added.
+    private List<Integer> joinSolvers(List<Integer> path) {
+        for (ForkJoinSolver solver : solvers) {
+            List<Integer> solverPath = solver.join();
+            if (solverPath != null) {
+                path = pathFromTo(start, solver.getOrigin());
+                path.addAll(solverPath);
             }
         }
 
-        //if not path found return original (= null)
-        return finalPath;
+        return path;
     }
+
 }
