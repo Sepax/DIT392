@@ -38,7 +38,7 @@ handle(State, {leave, Channel}) ->
 
 % Sending message (from GUI, to channel)
 handle(State, {message_send, Channel, Msg}) ->
-    Result = genserver:request(list_to_atom(Channel), {message_send, self(), State#client_state.nick, Msg}),
+    Result = genserver:request(list_to_atom(Channel), {message_send, Channel, self(), State#client_state.nick, Msg}),
     {reply, Result, State};
 
 % This case is only relevant for the distinction assignment!
