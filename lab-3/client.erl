@@ -27,8 +27,12 @@ initial_state(Nick, GUIAtom, ServerAtom) ->
 %                                    Helpers                                   %
 % ---------------------------------------------------------------------------- %
 
-server_registered(State) ->
+server_active(State) ->
     lists:member(State#client_state.server, registered()).
+
+% Checks if the channel with the given name is active
+channel_active(Channel) ->
+    lists:member(list_to_atom(Channel), registered()).
 
 join(Channel, State) ->
     genserver:request(State#client_state.server, {join, self(), Channel}).
@@ -39,7 +43,7 @@ join(Channel, State) ->
 
 % Join channel
 handle(State, {join, Channel}) ->
-    case server_registered(State) of
+    case server_active(State) of
         true ->
             Response = catch join(Channel, State),
             case Response of
@@ -61,10 +65,13 @@ handle(State, {leave, Channel}) ->
     
 % Sending message (from GUI, to channel)
 handle(State, {message_send, Channel, Msg}) ->
-    Result = genserver:request(
-        list_to_atom(Channel), {message_send, Channel, self(), State#client_state.nick, Msg}
-    ),
-    {reply, Result, State};
+    case channel_active(Channel) of
+        true ->
+            Response = genserver:request(list_to_atom(Channel), {message_send, Channel, self(), State#client_state.nick, Msg}),
+            {reply, Response, State};
+        false ->
+            {reply, {error, server_not_reached, "Channel unreachable"}, State}
+    end;
 
 % Change nick (no check, local only)
 handle(State, {nick, NewNick}) ->
