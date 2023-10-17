@@ -24,7 +24,7 @@ leave(Name, Client) ->
 handle(State, {join, Client}) ->
     case lists:member(Client, State) of
         true ->
-            {reply, {error, "Already joined"}, State};
+            {reply, {error, user_already_joined ,  "Already joined"}, State};
         false ->
             {reply, ok, [Client|State]}
     end;
@@ -34,17 +34,18 @@ handle(State, {leave, Client}) ->
         true ->
             {reply, ok, lists:delete(Client, State)};
         false ->
-            {reply, {error, "Client is not joined"}, State}
+            {reply, {error, user_not_joined , "Client is not joined"}, State}
     end;
+
 
 handle(State, {message_send, Client, Nick, Msg}) ->
     case lists:member(Client, State) of
         true ->
-            Response = {Client, {message_receive, self(), Nick, Msg}},
+            Response = {request, self(), make_ref(), {message_receive, self(), Nick, Msg}},
             lists:foreach(fun (Receiver) -> Receiver ! Response end, State),
             {reply, ok, State};
         false ->
-            {reply, {error, "Client is not joined"}, State}
+            {reply, {error, user_not_joined , "Client is not joined"}, State}
     end.
 
 
