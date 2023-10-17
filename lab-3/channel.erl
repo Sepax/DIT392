@@ -53,9 +53,9 @@ handle(State, {message_send, Client, Nick, Msg}) ->
     case lists:member(Client, State#c_state.clients) of
         true ->
             Response = {request, self(), make_ref(), {message_receive, State#c_state.name , Nick, Msg}},
-            Recievers = lists:filter(fun (C) -> C /= Client end, State#c_state.clients),
+            Receivers = lists:filter(fun (C) -> C /= Client end, State#c_state.clients),
             lists:foreach(
-                fun (Receiver) -> Receiver ! Response end, Recievers
+                fun (Receiver) -> Receiver ! Response end, Receivers
             ),
             {reply, ok, State};
         false ->
