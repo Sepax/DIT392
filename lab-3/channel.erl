@@ -3,15 +3,15 @@
 
 % ---------------------------- API ---------------------------- %
 
--record(cState, {
+-record(c_state, {
     name,   % Channel name
-    users % list of clients
+    clients % list of clients
 }).
 
 init_state(Name) -> 
-    #cState{
-name = Name,
-users = []
+    #c_state{
+        name = Name, 
+        clients = []
 }.
 
 % Starts a new channel with the given name
@@ -33,27 +33,30 @@ leave(Name, Client) ->
 % --------------------- Request Handler ---------------------- %
 
 handle(State, {join, Client}) ->
-    case lists:member(Client, State#cState.users) of
+    case lists:member(Client, State#c_state.clients) of
         true ->
             {reply, {error, user_already_joined ,  "Already joined"}, State};
         false ->
-            {reply, ok, State#cState{users=[Client | State#cState.users]}}
+            {reply, ok, State#c_state{clients=[Client | State#c_state.clients]}}
     end;
 
 handle(State, {leave, Client}) ->
-    case lists:member(Client, State#cState.users) of
+    case lists:member(Client, State#c_state.clients) of
         true ->
-            {reply, ok, lists:delete(Client, State#cState.users)};
+            {reply, ok, lists:delete(Client, State#c_state.clients)};
         false ->
             {reply, {error, user_not_joined , "Client is not joined"}, State}
     end;
 
 
 handle(State, {message_send, Client, Nick, Msg}) ->
-    case lists:member(Client, State#cState.users) of
+    case lists:member(Client, State#c_state.clients) of
         true ->
-            Response = {request, self(), make_ref(), {message_receive, State#cState.name , Nick, Msg}},
-            lists:foreach(fun (Receiver) -> Receiver ! Response end, State#cState.users),
+            Response = {request, self(), make_ref(), {message_receive, State#c_state.name , Nick, Msg}},
+            Recievers = lists:filter(fun (C) -> C /= Client end, State#c_state.clients),
+            lists:foreach(
+                fun (Receiver) -> Receiver ! Response end, Recievers
+            ),
             {reply, ok, State};
         false ->
             {reply, {error, user_not_joined , "Client is not joined"}, State}
