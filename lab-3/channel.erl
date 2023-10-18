@@ -21,6 +21,7 @@ leave(Name, Client) ->
 
 % --------------------- Request Handler ---------------------- %
 
+% join a client to the channel
 handle(State, {join, Client}) ->
     case lists:member(Client, State) of
         true ->
@@ -29,6 +30,7 @@ handle(State, {join, Client}) ->
             {reply, ok, [Client | State]}
     end;
 
+% leave a client from the channel
 handle(State, {leave, Client}) ->
     case lists:member(Client, State) of
         true ->
@@ -38,6 +40,7 @@ handle(State, {leave, Client}) ->
     end;
 
 
+% send a message to the channel
 handle(State, {message_send, Channel, Client, Nick, Msg}) ->
     case lists:member(Client, State) of
         true ->
